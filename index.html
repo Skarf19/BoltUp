@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>새벽에 벌떡 - Suddenly Awake at Dawn</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        overflow: hidden;
+        background-color: #1a1a2e;
+        font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      /* Controls hint */
+      #controls-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: clamp(13px, 1.4vw, 17px);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 14px 24px;
+        border-radius: 12px;
+        z-index: 100;
+        text-align: center;
+        border: 2px solid rgba(255, 234, 167, 0.3);
+        width: min(920px, calc(100vw - 40px));
+        white-space: nowrap;
+      }
+
+      #controls-hint span {
+        color: #ffeaa7;
+        font-weight: bold;
+      }
+
+      /* Visual guide for keyboard movement */
+      #key-guide {
+        position: fixed;
+        bottom: 92px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 20px;
+        z-index: 100;
+        pointer-events: none;
+      }
+
+      #key-guide .key {
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 234, 167, 0.2);
+        border: 2px solid rgba(255, 234, 167, 0.5);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 22px;
+        color: #ffeaa7;
+      }
+
+      #key-guide .key.walk {
+        animation: keyPulseWalk 1s ease-in-out infinite;
+      }
+
+      #key-guide .key.balance {
+        animation: keyPulseBalance 1.2s ease-in-out infinite;
+      }
+
+      @keyframes keyPulseWalk {
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.1); opacity: 1; background: rgba(255, 234, 167, 0.4); }
+      }
+
+      @keyframes keyPulseBalance {
+        0%, 100% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.1); opacity: 1; background: rgba(255, 234, 167, 0.4); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Keyboard movement guide -->
+    <div id="key-guide">
+      <span class="key balance">A</span>
+      <span>↔</span>
+      <span class="key balance">D</span>
+    </div>
+
+    <!-- Controls hint -->
+    <div id="controls-hint">
+      <span>A/D</span> 번갈아 밟기 | 움직이면 몸에 힘이 들어갑니다 | 멈추면 바로 무너집니다 | <span>W</span> 보조 | <span>R</span> 리셋
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
