@@ -19,15 +19,15 @@ const PALETTE = {
     skinShadow: 0xeec4a0,
     eyebag: 0xc9a0a0,
 
-    // Hair - Light brown / ash brown (bed hair look)
-    hair: 0x8B7355,          // Light brown / ash brown
-    hairHighlight: 0xA08060,  // Slightly lighter brown for highlights
+    // Hair - Dark brown/black
+    hair: 0x2a1a0a,           // Dark brown, almost black
+    hairHighlight: 0x3d2815,  // Slightly lighter dark brown
 
     // Face - larger and more visible
     eyeWhite: 0xffffff,
     eyeIris: 0x1a1208,
     eyePupil: 0x000000,
-    eyebrow: 0x6B5344,  // Brown to match hair
+    eyebrow: 0x5a4030,  // Medium brown (lighter than hair, won't look like facial hair)
     mouth: 0xb87070,
     mouthDark: 0x8a5555,
     nose: 0xeec4a0,
@@ -318,425 +318,204 @@ export class Player {
     }
 
     createHead() {
-        // Neck - positioned higher for better proportions
+        // Neck
         this.neckGroup.position.y = 0.42;
         this.torsoGroup.add(this.neckGroup);
 
+        const skinMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.skin });
+
         // Neck mesh
-        const neckMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.skin });
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.12, 12), neckMaterial);
-        neck.position.y = 0.06;
+        const neck = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.07, 0.09, 0.1, 12),
+            skinMaterial
+        );
+        neck.position.y = 0.05;
         this.neckGroup.add(neck);
 
         // Head group
-        this.headGroup.position.y = 0.18;
+        this.headGroup.position.y = 0.15;
         this.neckGroup.add(this.headGroup);
 
-        const skinMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.skin });
-        const headScale = GAME_CONSTANTS.HEAD_SIZE_MULTIPLIER;
-
-        // ============ HEAD SHAPE - Less round, more human-like ============
-        // Create a composite head shape: main cranium + face area + chin
-
-        // Main cranium - slightly flattened sphere for back/top of head
-        const cranium = new THREE.Mesh(
-            new THREE.SphereGeometry(0.26 * headScale, 16, 12),
+        // ============ SIMPLE CUTE HEAD ============
+        // Main head - slightly oval sphere
+        const head = new THREE.Mesh(
+            new THREE.SphereGeometry(0.24, 24, 18),
             skinMaterial
         );
-        cranium.scale.set(0.95, 0.88, 0.85); // Flatter, less spherical
-        cranium.position.set(0, 0.02, -0.02); // Shifted back slightly
-        this.headGroup.add(cranium);
+        head.scale.set(1.05, 1.0, 0.95);
+        this.headGroup.add(head);
+        this.head = head;
 
-        // Face area - flattened front for facial features
-        const faceArea = new THREE.Mesh(
-            new THREE.BoxGeometry(0.38 * headScale, 0.32 * headScale, 0.22 * headScale),
-            skinMaterial
-        );
-        faceArea.position.set(0, -0.02, 0.08);
-        // Round the edges slightly by scaling
-        this.headGroup.add(faceArea);
-
-        // Forehead - smooth transition
-        const forehead = new THREE.Mesh(
-            new THREE.SphereGeometry(0.2 * headScale, 12, 8),
-            skinMaterial
-        );
-        forehead.scale.set(1.1, 0.5, 0.6);
-        forehead.position.set(0, 0.12, 0.12);
-        this.headGroup.add(forehead);
-
-        // Cheekbones - slight definition
-        const leftCheek = new THREE.Mesh(
-            new THREE.SphereGeometry(0.1 * headScale, 8, 6),
-            skinMaterial
-        );
-        leftCheek.scale.set(0.8, 0.6, 0.5);
-        leftCheek.position.set(-0.14, -0.02, 0.14);
-        this.headGroup.add(leftCheek);
-
-        const rightCheek = new THREE.Mesh(
-            new THREE.SphereGeometry(0.1 * headScale, 8, 6),
-            skinMaterial
-        );
-        rightCheek.scale.set(0.8, 0.6, 0.5);
-        rightCheek.position.set(0.14, -0.02, 0.14);
-        this.headGroup.add(rightCheek);
-
-        // Chin - gives the face more definition
-        const chin = new THREE.Mesh(
-            new THREE.SphereGeometry(0.12 * headScale, 10, 8),
-            skinMaterial
-        );
-        chin.scale.set(0.8, 0.6, 0.7);
-        chin.position.set(0, -0.16, 0.1);
-        this.headGroup.add(chin);
-
-        // Back of head - smooth coverage
-        const backHead = new THREE.Mesh(
-            new THREE.SphereGeometry(0.22 * headScale, 12, 10),
-            skinMaterial
-        );
-        backHead.scale.set(1.0, 0.9, 0.7);
-        backHead.position.set(0, 0, -0.1);
-        this.headGroup.add(backHead);
-
-        // Store head reference for face positioning
-        this.head = cranium;
-
-        // ============ MESSY BED HAIR - No hat! ============
-        this.createHair(headScale);
+        // ============ HAIR ============
+        this.createHair();
 
         // ============ FACE ============
-        this.createFace(headScale);
+        this.createFace();
 
-        // Ears - on sides of head
+        // Ears - small and cute
+        const earMat = new THREE.MeshLambertMaterial({ color: PALETTE.skinShadow });
         const leftEar = new THREE.Mesh(
-            new THREE.SphereGeometry(0.05, 8, 6),
-            skinMaterial
+            new THREE.SphereGeometry(0.035, 8, 6),
+            earMat
         );
-        leftEar.position.set(-0.32, 0.0, 0);
-        leftEar.scale.set(0.4, 1, 0.6);
+        leftEar.position.set(-0.24, 0, 0);
+        leftEar.scale.set(0.5, 1, 0.7);
         this.headGroup.add(leftEar);
 
         const rightEar = new THREE.Mesh(
-            new THREE.SphereGeometry(0.05, 8, 6),
-            skinMaterial
+            new THREE.SphereGeometry(0.035, 8, 6),
+            earMat
         );
-        rightEar.position.set(0.32, 0.0, 0);
-        rightEar.scale.set(0.4, 1, 0.6);
+        rightEar.position.set(0.24, 0, 0);
+        rightEar.scale.set(0.5, 1, 0.7);
         this.headGroup.add(rightEar);
     }
 
     /**
-     * Create sleepy face with visible features
-     * Face is positioned on the flatter front area of the head
+     * Create simple cute sleepy face
      */
-    createFace(headScale) {
+    createFace() {
         const faceGroup = new THREE.Group();
-        faceGroup.name = "SleepyFace";
+        faceGroup.name = "Face";
 
-        // New head has flatter front - faceArea box at z=0.08, depth 0.22*headScale
-        // Front surface is at approximately z = 0.08 + (0.22 * headScale / 2) = 0.19
-        const faceZ = 0.19;
+        // Head radius is 0.24 * 1.05 (x-scale) = ~0.25
+        // Face features need to be ON the surface, so z should be ~0.23-0.24
+        const faceZ = 0.23;
+        const eyeY = 0.03;
+        const eyeSpacing = 0.07;
 
-        // Face vertical center (slightly above head center for natural look)
-        const faceY = -0.02; // Adjusted for new head shape
+        // ========== EYES - Bigger cute style ==========
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a });
 
-        // Eye spacing (wider for cartoon look)
-        const eyeSpacing = 0.1;
-        const eyeY = faceY + 0.05;
+        // Left eye - bigger dark oval
+        const leftEye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.055, 12, 8),
+            eyeMat
+        );
+        leftEye.position.set(-eyeSpacing, eyeY, faceZ);
+        leftEye.scale.set(0.9, 0.6, 0.25); // Sleepy half-closed but bigger
+        faceGroup.add(leftEye);
 
-        // ========== MATERIALS - Clean face, no facial hair look ==========
-        const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff }); // Bright white
-        const eyeIrisMat = new THREE.MeshBasicMaterial({ color: 0x4a3520 }); // Medium brown (not too dark)
-        const eyePupilMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a }); // Very dark (not pure black)
-        const eyelidMat = new THREE.MeshBasicMaterial({ color: PALETTE.skin }); // Skin tone
-        const eyebagMat = new THREE.MeshBasicMaterial({ color: 0xddb0a8 }); // Light tired pinkish (subtle)
-        const eyebrowMat = new THREE.MeshBasicMaterial({ color: PALETTE.eyebrow }); // Brown to match hair
-        const noseMat = new THREE.MeshBasicMaterial({ color: PALETTE.skin }); // Same as skin (subtle)
-        const mouthMat = new THREE.MeshBasicMaterial({ color: 0xee9999 }); // Light pink lips
-        const mouthDarkMat = new THREE.MeshBasicMaterial({ color: 0xcc7777 }); // Pinkish inside (NOT dark!)
+        // Right eye
+        const rightEye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.055, 12, 8),
+            eyeMat
+        );
+        rightEye.position.set(eyeSpacing, eyeY, faceZ);
+        rightEye.scale.set(0.9, 0.6, 0.25);
+        faceGroup.add(rightEye);
+
+        // Eye shine - white highlights (bigger too)
+        const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+        const leftShine = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 6, 4),
+            shineMat
+        );
+        leftShine.position.set(-eyeSpacing + 0.015, eyeY + 0.008, faceZ + 0.01);
+        faceGroup.add(leftShine);
+
+        const rightShine = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 6, 4),
+            shineMat
+        );
+        rightShine.position.set(eyeSpacing + 0.015, eyeY + 0.008, faceZ + 0.01);
+        faceGroup.add(rightShine);
+
+        // ========== BLUSH - Pink cheeks ==========
         const blushMat = new THREE.MeshBasicMaterial({
-            color: 0xffcccc,
+            color: 0xffaaaa,
             transparent: true,
-            opacity: 0.3
+            opacity: 0.5
         });
-
-        // ========== EYES - Large, half-closed, sleepy - BIGGER for visibility ==========
-
-        // Left eye socket/white - large oval, clearly visible
-        const leftEyeWhite = new THREE.Mesh(
-            new THREE.SphereGeometry(0.07, 16, 12),  // Larger
-            eyeWhiteMat
-        );
-        leftEyeWhite.position.set(-eyeSpacing, eyeY, faceZ + 0.02);
-        leftEyeWhite.scale.set(1.1, 0.5, 0.3); // Wide, short (half-closed)
-        faceGroup.add(leftEyeWhite);
-
-        // Right eye socket/white
-        const rightEyeWhite = new THREE.Mesh(
-            new THREE.SphereGeometry(0.07, 16, 12),  // Larger
-            eyeWhiteMat
-        );
-        rightEyeWhite.position.set(eyeSpacing, eyeY, faceZ + 0.02);
-        rightEyeWhite.scale.set(1.1, 0.5, 0.3);
-        faceGroup.add(rightEyeWhite);
-
-        // Left iris - dark, clearly visible
-        const leftIris = new THREE.Mesh(
-            new THREE.SphereGeometry(0.045, 12, 10),  // Larger
-            eyeIrisMat
-        );
-        leftIris.position.set(-eyeSpacing, eyeY - 0.005, faceZ + 0.03);
-        leftIris.scale.set(1.0, 0.55, 0.35);
-        faceGroup.add(leftIris);
-
-        // Right iris
-        const rightIris = new THREE.Mesh(
-            new THREE.SphereGeometry(0.045, 12, 10),  // Larger
-            eyeIrisMat
-        );
-        rightIris.position.set(eyeSpacing, eyeY - 0.005, faceZ + 0.03);
-        rightIris.scale.set(1.0, 0.55, 0.35);
-        faceGroup.add(rightIris);
-
-        // Left pupil - visible black dot
-        const leftPupil = new THREE.Mesh(
-            new THREE.SphereGeometry(0.02, 8, 6),  // Larger
-            eyePupilMat
-        );
-        leftPupil.position.set(-eyeSpacing, eyeY - 0.008, faceZ + 0.04);
-        leftPupil.scale.set(0.9, 0.6, 0.4);
-        faceGroup.add(leftPupil);
-
-        // Right pupil
-        const rightPupil = new THREE.Mesh(
-            new THREE.SphereGeometry(0.02, 8, 6),  // Larger
-            eyePupilMat
-        );
-        rightPupil.position.set(eyeSpacing, eyeY - 0.008, faceZ + 0.04);
-        rightPupil.scale.set(0.9, 0.6, 0.4);
-        faceGroup.add(rightPupil);
-
-        // ========== HEAVY EYELIDS - Drooping over eyes ==========
-
-        // Left upper eyelid (skin colored, covers top of eye) - LARGER
-        const leftEyelid = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 0.04, 0.035),  // Bigger
-            eyelidMat
-        );
-        leftEyelid.position.set(-eyeSpacing, eyeY + 0.025, faceZ + 0.025);
-        leftEyelid.rotation.z = -0.12; // Drooping inward
-        leftEyelid.rotation.x = 0.15;  // Tilted forward
-        faceGroup.add(leftEyelid);
-
-        // Right upper eyelid
-        const rightEyelid = new THREE.Mesh(
-            new THREE.BoxGeometry(0.1, 0.04, 0.035),  // Bigger
-            eyelidMat
-        );
-        rightEyelid.position.set(eyeSpacing, eyeY + 0.025, faceZ + 0.025);
-        rightEyelid.rotation.z = 0.12; // Drooping inward
-        rightEyelid.rotation.x = 0.15;
-        faceGroup.add(rightEyelid);
-
-        // ========== EYEBAGS - Dark circles under eyes ==========
-
-        // Left eyebag - more prominent
-        const leftEyebag = new THREE.Mesh(
-            new THREE.SphereGeometry(0.05, 10, 8),  // Bigger
-            eyebagMat
-        );
-        leftEyebag.position.set(-eyeSpacing, eyeY - 0.04, faceZ + 0.01);
-        leftEyebag.scale.set(1.3, 0.45, 0.35);
-        faceGroup.add(leftEyebag);
-
-        // Right eyebag
-        const rightEyebag = new THREE.Mesh(
-            new THREE.SphereGeometry(0.05, 10, 8),  // Bigger
-            eyebagMat
-        );
-        rightEyebag.position.set(eyeSpacing, eyeY - 0.04, faceZ + 0.01);
-        rightEyebag.scale.set(1.3, 0.45, 0.35);
-        faceGroup.add(rightEyebag);
-
-        // ========== EYEBROWS - Thick, tired, droopy ==========
-
-        // Left eyebrow - thicker and more visible
-        const leftEyebrow = new THREE.Mesh(
-            new THREE.BoxGeometry(0.09, 0.028, 0.025),  // Bigger
-            eyebrowMat
-        );
-        leftEyebrow.position.set(-eyeSpacing, eyeY + 0.07, faceZ + 0.02);
-        leftEyebrow.rotation.z = 0.2; // Angled down toward outside
-        faceGroup.add(leftEyebrow);
-
-        // Right eyebrow - slightly raised (asymmetric tired look)
-        const rightEyebrow = new THREE.Mesh(
-            new THREE.BoxGeometry(0.09, 0.028, 0.025),  // Bigger
-            eyebrowMat
-        );
-        rightEyebrow.position.set(eyeSpacing, eyeY + 0.075, faceZ + 0.02);
-        rightEyebrow.rotation.z = -0.1; // Less angled
-        faceGroup.add(rightEyebrow);
-
-        // ========== NOSE - Small, cute, visible ==========
-
-        const nose = new THREE.Mesh(
-            new THREE.SphereGeometry(0.035, 10, 8),  // Slightly bigger
-            noseMat
-        );
-        nose.position.set(0, faceY - 0.015, faceZ + 0.04);
-        nose.scale.set(0.85, 0.75, 0.55);
-        faceGroup.add(nose);
-
-        // Nostrils - tiny, subtle (NOT dark - would look like mustache)
-        const nostrilMat = new THREE.MeshBasicMaterial({ color: 0xccaa99 }); // Light skin shadow
-        const leftNostril = new THREE.Mesh(
-            new THREE.SphereGeometry(0.006, 6, 4),  // Very small
-            nostrilMat
-        );
-        leftNostril.position.set(-0.012, faceY - 0.028, faceZ + 0.042);
-        faceGroup.add(leftNostril);
-
-        const rightNostril = new THREE.Mesh(
-            new THREE.SphereGeometry(0.006, 6, 4),  // Very small
-            nostrilMat
-        );
-        rightNostril.position.set(0.012, faceY - 0.028, faceZ + 0.042);
-        faceGroup.add(rightNostril);
-
-        // ========== MOUTH - Visible, slightly open, tired ==========
-
-        // Mouth opening (dark inside) - LARGER
-        const mouthOpening = new THREE.Mesh(
-            new THREE.BoxGeometry(0.08, 0.03, 0.025),  // Bigger
-            mouthDarkMat
-        );
-        mouthOpening.position.set(0, faceY - 0.08, faceZ + 0.02);
-        mouthOpening.rotation.z = 0.02; // Slightly crooked (tired)
-        faceGroup.add(mouthOpening);
-
-        // Upper lip - visible
-        const upperLip = new THREE.Mesh(
-            new THREE.BoxGeometry(0.085, 0.015, 0.022),  // Bigger
-            mouthMat
-        );
-        upperLip.position.set(0, faceY - 0.065, faceZ + 0.025);
-        faceGroup.add(upperLip);
-
-        // Lower lip - slightly open/droopy
-        const lowerLip = new THREE.Mesh(
-            new THREE.BoxGeometry(0.07, 0.018, 0.02),  // Bigger
-            mouthMat
-        );
-        lowerLip.position.set(0, faceY - 0.095, faceZ + 0.022);
-        faceGroup.add(lowerLip);
-
-        // Small drool hint - cute tired detail
-        const drool = new THREE.Mesh(
-            new THREE.SphereGeometry(0.01, 6, 4),  // Slightly bigger
-            new THREE.MeshBasicMaterial({ color: 0xddeeff, transparent: true, opacity: 0.7 })
-        );
-        drool.position.set(0.04, faceY - 0.098, faceZ + 0.025);
-        faceGroup.add(drool);
-
-        // ========== BLUSH - Subtle pink cheeks ==========
 
         const leftBlush = new THREE.Mesh(
             new THREE.SphereGeometry(0.035, 8, 6),
             blushMat
         );
-        leftBlush.position.set(-0.14, faceY - 0.02, faceZ - 0.04);
-        leftBlush.scale.set(1, 0.6, 0.3);
+        leftBlush.position.set(-0.1, -0.01, faceZ - 0.01);
+        leftBlush.scale.set(1.0, 0.6, 0.2);
         faceGroup.add(leftBlush);
 
         const rightBlush = new THREE.Mesh(
             new THREE.SphereGeometry(0.035, 8, 6),
             blushMat
         );
-        rightBlush.position.set(0.14, faceY - 0.02, faceZ - 0.04);
-        rightBlush.scale.set(1, 0.6, 0.3);
+        rightBlush.position.set(0.1, -0.01, faceZ - 0.01);
+        rightBlush.scale.set(1.0, 0.6, 0.2);
         faceGroup.add(rightBlush);
 
-        // Add face group to head
+        // ========== MOUTH - Small sleepy mouth ==========
+        const mouthMat = new THREE.MeshBasicMaterial({ color: 0xdd9999 });
+
+        const mouth = new THREE.Mesh(
+            new THREE.BoxGeometry(0.035, 0.015, 0.01),
+            mouthMat
+        );
+        mouth.position.set(0, -0.05, faceZ);
+        faceGroup.add(mouth);
+
+        // Add face to head
         this.headGroup.add(faceGroup);
         this.faceGroup = faceGroup;
     }
 
     /**
-     * Create messy short bed hair - ONLY on top of head
-     * Small spiky chunks sticking up at random angles
-     * NO side coverage, NO face coverage - just messy top spikes
+     * Create simple short hair - bowl cut style sitting on top of head
      */
-    createHair(headScale) {
+    createHair() {
         const hairGroup = new THREE.Group();
-        hairGroup.name = "MessyBedHair";
+        hairGroup.name = "Hair";
 
-        const hairMaterial = new THREE.MeshLambertMaterial({ color: PALETTE.hair });
-        const hairHighlightMat = new THREE.MeshLambertMaterial({ color: PALETTE.hairHighlight });
+        const hairMat = new THREE.MeshLambertMaterial({ color: PALETTE.hair });
 
-        // ========== SPIKY TOP HAIR - Small chunks sticking up ==========
-        // All positioned on TOP of head only, pointing upward/outward at random angles
-
-        const spikyHair = [
-            // Center top - sticking straight up
-            { pos: [0, 0.28, 0], rot: [0, 0, 0], radius: 0.025, height: 0.08 },
-            { pos: [0.02, 0.27, 0.02], rot: [0.3, 0, 0.2], radius: 0.022, height: 0.07 },
-            { pos: [-0.02, 0.27, 0.01], rot: [0.2, 0, -0.25], radius: 0.023, height: 0.065 },
-
-            // Front-center - leaning forward slightly
-            { pos: [0, 0.25, 0.08], rot: [0.5, 0, 0], radius: 0.02, height: 0.055 },
-            { pos: [0.03, 0.24, 0.07], rot: [0.45, 0, 0.15], radius: 0.018, height: 0.05 },
-            { pos: [-0.03, 0.24, 0.07], rot: [0.4, 0, -0.2], radius: 0.019, height: 0.052 },
-
-            // Left side top - tilting left
-            { pos: [-0.06, 0.26, 0], rot: [0.1, 0, -0.5], radius: 0.024, height: 0.07 },
-            { pos: [-0.08, 0.24, 0.02], rot: [0.2, 0, -0.6], radius: 0.02, height: 0.06 },
-            { pos: [-0.05, 0.25, -0.03], rot: [-0.2, 0, -0.4], radius: 0.021, height: 0.055 },
-            { pos: [-0.09, 0.23, -0.02], rot: [-0.1, 0.2, -0.7], radius: 0.018, height: 0.05 },
-
-            // Right side top - tilting right
-            { pos: [0.06, 0.26, 0.01], rot: [0.15, 0, 0.5], radius: 0.023, height: 0.068 },
-            { pos: [0.08, 0.24, 0.03], rot: [0.25, 0, 0.55], radius: 0.019, height: 0.058 },
-            { pos: [0.05, 0.25, -0.02], rot: [-0.15, 0, 0.45], radius: 0.02, height: 0.052 },
-            { pos: [0.09, 0.23, -0.01], rot: [0, -0.15, 0.65], radius: 0.017, height: 0.048 },
-
-            // Back top - tilting backward
-            { pos: [0, 0.24, -0.06], rot: [-0.6, 0, 0], radius: 0.025, height: 0.065 },
-            { pos: [-0.04, 0.23, -0.07], rot: [-0.5, 0, -0.2], radius: 0.02, height: 0.055 },
-            { pos: [0.04, 0.23, -0.07], rot: [-0.55, 0, 0.15], radius: 0.021, height: 0.058 },
-            { pos: [-0.07, 0.22, -0.05], rot: [-0.4, 0.1, -0.35], radius: 0.018, height: 0.05 },
-            { pos: [0.07, 0.22, -0.05], rot: [-0.35, -0.1, 0.4], radius: 0.019, height: 0.052 },
-
-            // Extra random spikes for messy look
-            { pos: [0.01, 0.29, -0.01], rot: [-0.1, 0.2, 0.1], radius: 0.02, height: 0.06 },
-            { pos: [-0.04, 0.27, 0.04], rot: [0.35, 0.1, -0.3], radius: 0.018, height: 0.055 },
-            { pos: [0.05, 0.26, 0.05], rot: [0.4, -0.1, 0.25], radius: 0.019, height: 0.05 },
-        ];
-
-        spikyHair.forEach((spike, i) => {
-            const mat = i % 3 === 0 ? hairHighlightMat : hairMaterial;
-            const hair = new THREE.Mesh(
-                new THREE.ConeGeometry(spike.radius, spike.height, 5),
-                mat
-            );
-            hair.position.set(...spike.pos);
-            hair.rotation.set(...spike.rot);
-            hairGroup.add(hair);
-        });
-
-        // ========== HAIR BASE - Small flat layer on top of head ==========
-        // Just enough to cover the scalp, not a helmet
-        const hairBase = new THREE.Mesh(
-            new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.4),
-            hairMaterial
+        // Simple bowl-cut style hair using a flattened sphere
+        // Positioned high on head, above the face
+        const hairTop = new THREE.Mesh(
+            new THREE.SphereGeometry(0.26, 20, 12),
+            hairMat
         );
-        hairBase.position.set(0, 0.15, -0.02);
-        hairBase.scale.set(1.0, 0.4, 0.9);
-        hairGroup.add(hairBase);
+        // Flatten it and position on top of head
+        hairTop.scale.set(1.0, 0.5, 1.0);
+        hairTop.position.set(0, 0.14, -0.02);
+        hairGroup.add(hairTop);
 
-        // Add hair group to head
+        // Small fringe/bangs at the front (above forehead, not covering face)
+        const bangs = new THREE.Mesh(
+            new THREE.BoxGeometry(0.22, 0.06, 0.08),
+            hairMat
+        );
+        bangs.position.set(0, 0.12, 0.12);
+        bangs.rotation.x = 0.3; // Slight tilt
+        hairGroup.add(bangs);
+
+        // Side hair - left
+        const leftSide = new THREE.Mesh(
+            new THREE.SphereGeometry(0.08, 8, 6),
+            hairMat
+        );
+        leftSide.position.set(-0.18, 0.06, 0);
+        leftSide.scale.set(0.6, 1.0, 0.8);
+        hairGroup.add(leftSide);
+
+        // Side hair - right
+        const rightSide = new THREE.Mesh(
+            new THREE.SphereGeometry(0.08, 8, 6),
+            hairMat
+        );
+        rightSide.position.set(0.18, 0.06, 0);
+        rightSide.scale.set(0.6, 1.0, 0.8);
+        hairGroup.add(rightSide);
+
+        // Back of head hair
+        const backHair = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 12, 10),
+            hairMat
+        );
+        backHair.position.set(0, 0.04, -0.14);
+        backHair.scale.set(1.0, 0.8, 0.5);
+        hairGroup.add(backHair);
+
         this.headGroup.add(hairGroup);
         this.hairGroup = hairGroup;
     }
